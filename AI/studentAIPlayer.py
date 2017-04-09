@@ -1,4 +1,4 @@
-import random
+
 import sys
 import operator
 import numpy as np
@@ -10,8 +10,7 @@ from Ant import UNIT_STATS
 from Move import Move
 from GameState import *
 from AIPlayerUtils import *
-from random import seed
-from random import random
+from random import *
 
 ##
 #AIPlayer
@@ -31,105 +30,154 @@ class AIPlayer(Player):
     #   inputPlayerId - The id to give the new player (int)
     ##
     def __init__(self, inputPlayerId):
-        super(AIPlayer,self).__init__(inputPlayerId, "MiniMatt")
+        super(AIPlayer,self).__init__(inputPlayerId, "MiniMattNeuralNet")
         #limit of how deep function should recurse
         self.depthLimit = 3
         self.me = inputPlayerId
-        self.network = 
-        [[ -8.50863524e-02   5.92700048e-01  -6.72884740e-01  -1.65707515e-01
-           -6.54690046e-01  -7.50265839e-01  -1.96752868e-01  -2.83456515e-01
-           -1.31496152e-01   7.06666688e-02]
-         [ -7.30834672e-01   2.52494107e-01   1.91873857e-01   1.67578803e+00
-           -1.14727183e+00   6.36978807e-01  -5.25988448e-01   4.69738220e-01
-            1.44990530e-02  -1.44108196e+00]
-         [  6.01489137e-01   9.36523151e-01  -3.73151644e-01   3.84645231e-01
-            7.52778305e-01   7.89213327e-01  -8.29911577e-01  -9.21890434e-01
-           -6.60339161e-01   7.56285007e-01]
-         [ -7.85442005e-01  -1.52306000e-01   8.89851960e-01   7.13157032e-03
-            3.95239726e-01  -3.74979031e-01   4.02459026e-01   6.61860084e-01
-           -9.87969945e-01   5.33889405e-01]
-         [  9.77722178e-01   4.96331309e-01  -4.39112016e-01   5.78558657e-01
-           -7.93547987e-01  -1.04212948e-01   8.17191006e-01  -4.12771703e-01
-           -4.24449323e-01  -7.39942856e-01]
-         [ -9.61266084e-01   3.57671066e-01  -5.76743768e-01  -4.68906681e-01
-           -1.68536814e-02  -8.93274910e-01   1.48235211e-01  -7.06542850e-01
-            1.78611074e-01   3.99516720e-01]
-         [ -7.95331142e-01  -1.71888024e-01   3.88800315e-01  -1.71641461e-01
-           -9.00093082e-01   7.17928118e-02   3.27589290e-01   2.97782241e-02
-            8.89189512e-01   1.73110081e-01]
-         [  8.06803831e-01  -7.25050592e-01  -7.21447305e-01   6.14782577e-01
-           -2.04646326e-01  -6.69291606e-01   8.55017161e-01  -3.04468281e-01
-            5.01624206e-01   4.51995971e-01]
-         [  7.66612182e-01   2.47344414e-01   5.01884868e-01  -3.02203316e-01
-           -4.60144216e-01   7.91772436e-01  -1.43817620e-01   9.29680094e-01
-            3.26882996e-01   2.43391440e-01]
-         [ -7.70508054e-01   8.98978517e-01  -1.00175733e-01   1.56779229e-01
-           -1.83726394e-01  -5.25946040e-01   8.06759041e-01   1.47358973e-01
-           -9.94259346e-01   2.34289827e-01]
-         [ -2.98466027e-01   6.94892909e-02   6.95328162e-01  -4.76865562e-01
-            8.48971945e-01   2.17617537e-01  -9.23921262e-01   8.32124643e-01
-            2.79313320e-01   1.15181492e+00]
-         [ -6.55318983e-01  -7.25728501e-01   8.65190926e-01   3.93636323e-01
-           -8.67999655e-01   5.10926105e-01   5.07752377e-01   8.46049071e-01
-            4.23049517e-01  -7.51458076e-01]
-         [ -3.76254891e-01  -6.98433907e-01  -1.29698673e+00  -9.46899597e-01
-            9.30513944e-01  -1.18211698e-01   8.23075297e-01   3.91266337e-01
-           -1.28338263e+00   1.97915498e-01]
-         [  7.55503385e-01   1.18833562e+00  -2.31539271e-01  -1.40202715e+00
-            8.11723392e-01  -7.29925279e-01   1.33164173e+00  -5.17074159e-01
-            1.95354447e-01   1.13379143e+00]
-         [  1.12480468e-01  -7.27089549e-01  -8.80164621e-01  -7.57313089e-01
-           -9.10896243e-01  -7.85011742e-01  -5.48581323e-01   4.25977961e-01
-            1.19433964e-01  -9.74888040e-01]
-         [ -8.56051441e-01   9.34552660e-01   1.36200924e-01  -5.93413531e-01
-           -4.95348511e-01   4.87651708e-01  -6.09141038e-01   1.62717855e-01
-            9.40039978e-01   6.93657603e-01]
-         [ -5.02440154e-01  -6.98182167e-03   2.13984336e-01   5.98762799e-01
-           -6.74931712e-01  -9.68857889e-01  -8.30498542e-01  -3.47010381e-02
-            1.88112424e-01   1.71303650e-01]
-         [ -3.65275181e-01   9.77232309e-01   1.59490438e-01  -2.39717655e-01
-            1.01896438e-01   4.90668862e-01   3.38465787e-01  -4.70160885e-01
-           -8.67330331e-01  -2.59831604e-01]
-         [  2.59435014e-01  -5.79651980e-01   5.05511107e-01  -8.66927037e-01
-           -4.79369803e-01   6.09509127e-01  -6.13131435e-01   2.78921762e-01
-            4.93406182e-02   8.49615941e-01]
-         [ -4.73406459e-01  -8.68077819e-01   4.70131927e-01   5.44356059e-01
-            8.15631705e-01   8.63944138e-01  -9.72096854e-01  -5.31275828e-01
-            2.33556714e-01   8.98032641e-01]
-         [  9.00352238e-01   1.13306376e-01   8.31212700e-01   2.83132418e-01
-           -2.19984572e-01  -2.80186658e-02   2.08620966e-01   9.90958430e-02
-            8.52362853e-01   8.37466871e-01]
-         [ -1.62004605e-01   9.41898143e-01  -7.28644703e-01  -9.38746043e-01
-           -6.97940041e-01  -1.77783637e-02  -9.12514137e-01   8.69190598e-01
-            5.51750427e-01  -8.12792816e-01]
-         [ -6.47607489e-01  -3.35872851e-01  -7.38006310e-01   6.18981384e-01
-           -3.10526695e-01   8.80214965e-01   1.64028360e-01   7.57663969e-01
-            6.89468891e-01   8.10784637e-01]
-         [ -8.02394684e-02   9.26936320e-02   5.97207182e-01  -4.28562297e-01
-           -1.94929548e-02   1.98220615e-01  -9.68933449e-01   1.86962816e-01
-           -1.32647302e-01   6.14721058e-01]
-         [ -9.38734094e-01   6.67832523e-01   9.38683788e-01   2.87573557e-01
-            3.73811452e-01   5.20106141e-01  -1.25277951e+00   1.92745923e-01
-            1.09186285e+00  -8.13815289e-05]
-         [ -9.50951781e-01   9.68891384e-01  -3.23395407e-01   7.56161995e-01
-            2.41333845e-01   6.28588921e-01   1.93859262e-01   2.29402572e-01
-           -5.31327952e-01   3.30835904e-01]
-         [  5.00043527e-01   7.16627673e-01   5.10164377e-01   3.96114497e-01
-            7.28958860e-01  -3.54638006e-01   3.41577582e-01  -9.82521272e-02
-           -2.35794496e-01  -1.78377300e-01]
-         [  3.86944009e-01  -1.16087989e-01  -1.09760974e-01  -5.78827190e-01
-            1.15806220e+00   1.59727956e-01   1.14571116e-01  -4.39393429e-01
-           -8.45036782e-01   1.23482575e+00]
-         [  7.77860905e-01   8.13162661e-01   2.99512524e-01  -5.18782476e-01
-           -4.83781098e-01   7.03785592e-01   8.48864631e-02   5.96930908e-01
-            1.20430535e-01   4.99885826e-01]
-         [  3.80232549e-02   5.41767821e-01   1.37715981e-01  -6.85802428e-02
-           -3.14622184e-01  -8.63581303e-01  -2.44151641e-01  -8.40747845e-01
-            9.65634227e-01  -6.36774297e-01]
-         [  5.44936950e-02   6.31978396e-01   1.15979586e+00   1.05854198e+00
-           -8.80104142e-01   2.29803832e-01  -6.70253951e-01  -1.97561521e-01
-            9.18748913e-01  -1.21274526e+00]]
+        self.currGame = 0
+        self.trainGames = 2
+        self.layer1 = None
+        self.layer2 = None
+        #hardcoded weights from series of training
+        self.weights1 = np.matrix( \
+            [[ -4.77386741e-01,   2.29288280e+00,  -9.92966074e+00,
+                      -9.17126974e+00,  -9.70811475e+00,  -9.92530154e+00,
+                      -8.38703673e+00,  -9.49442783e+00,  -9.28327475e+00,
+                       8.84240655e-01],
+                    [ -7.30834672e-01,   2.52494107e-01,   1.91873857e-01,
+                       1.67578803e+00,  -1.14727183e+00,   6.36978807e-01,
+                      -5.25988448e-01,   4.69738220e-01,   1.44990530e-02,
+                      -1.44108196e+00],
+                    [ -7.85817106e+00,  -5.17749038e+00,  -8.56297081e+00,
+                      -7.54960747e+00,  -7.49722116e+00,  -7.34421739e+00,
+                      -9.10876487e+00,  -9.11539581e+00,  -8.62921590e+00,
+                      -3.51233175e+00],
+                    [ -1.84607715e+01,  -1.45121245e+00,  -1.70038708e+01,
+                      -1.79362413e+01,  -1.74077125e+01,  -1.83201142e+01,
+                      -1.71066649e+01,  -1.72548215e+01,  -1.88793307e+01,
+                      -1.87339229e-01],
+                    [  3.33835460e+00,   3.24570039e+00,  -1.12629830e+01,
+                      -1.02383888e+01,  -1.16260104e+01,  -1.09390103e+01,
+                      -9.62764013e+00,  -1.12445714e+01,  -1.12162987e+01,
+                      -1.19923667e+00],
+                    [  2.35675865e+00,   7.62311103e-01,   3.25408770e+00,
+                       3.36424022e+00,   3.81875527e+00,   2.94726464e+00,
+                       3.92208990e+00,   3.13078700e+00,   4.04497949e+00,
+                       5.17163399e-01],
+                    [  4.73883270e+00,   5.84405436e-01,   4.55448288e+00,
+                       3.99538736e+00,   3.28220357e+00,   4.24351330e+00,
+                       4.59953092e+00,   4.20459766e+00,   4.91458407e+00,
+                       5.21183729e-01],
+                    [  4.01923114e+00,   5.06707334e-01,   2.22590357e+00,
+                       3.56515839e+00,   2.76121362e+00,   2.27196042e+00,
+                       4.06954179e+00,   2.64005759e+00,   3.50825375e+00,
+                       1.13501563e+00],
+                    [  2.95472950e+00,   6.75946013e-01,   4.67762535e+00,
+                       3.87750511e+00,   3.72315934e+00,   4.97285621e+00,
+                       4.01901080e+00,   5.11057414e+00,   4.49599435e+00,
+                       1.12853173e+00],
+                    [  1.71811025e+00,   1.05301914e+00,   3.60063188e+00,
+                       3.84605642e+00,   3.52403745e+00,   3.18356527e+00,
+                       4.45569634e+00,   3.85048790e+00,   2.70470589e+00,
+                       1.21167808e+00],
+                    [  1.94705514e+00,   7.82318771e-01,   3.94784249e+00,
+                       2.78370670e+00,   4.10744235e+00,   3.48154044e+00,
+                       2.32902151e+00,   4.09029839e+00,   3.51342210e+00,
+                       1.25003173e+00],
+                    [  1.87093911e+00,   9.42760654e-01,   2.74338974e+00,
+                       2.30337496e+00,   1.13277982e+00,   2.44166023e+00,
+                       2.54012663e+00,   2.77973735e+00,   2.22443392e+00,
+                       1.03518893e+00],
+                    [  1.46923998e+00,   2.88570853e-01,   2.33069056e+00,
+                       2.68042939e+00,   4.55660070e+00,   3.50951726e+00,
+                       4.43664598e+00,   4.01788744e+00,   2.34307018e+00,
+                       1.55738825e+00],
+                    [  1.85207630e+00,   2.17116415e+00,  -4.93368766e+00,
+                      -6.10990067e+00,  -3.78849847e+00,  -5.48639548e+00,
+                      -2.36084412e+00,  -5.24027828e+00,  -4.42830456e+00,
+                       6.00627443e+00],
+                    [  5.70612309e-01,   1.13830442e-02,  -3.35714387e+00,
+                      -3.01336983e+00,  -3.44554102e+00,  -3.20754650e+00,
+                      -3.11958546e+00,  -2.07211339e+00,  -2.22673606e+00,
+                      -3.23030470e+00],
+                    [ -2.80305659e+00,   9.13434282e-01,  -1.94144744e+00,
+                      -2.63504550e+00,  -2.41390656e+00,  -1.50837904e+00,
+                      -2.53593492e+00,  -1.82695798e+00,  -1.24190959e+00,
+                      -1.10983476e+00],
+                    [ -5.02440154e-01,  -6.98182167e-03,   2.13984336e-01,
+                       5.98762799e-01,  -6.74931712e-01,  -9.68857889e-01,
+                      -8.30498542e-01,  -3.47010381e-02,   1.88112424e-01,
+                       1.71303650e-01],
+                    [ -3.65275181e-01,   9.77232309e-01,   1.59490438e-01,
+                      -2.39717655e-01,   1.01896438e-01,   4.90668862e-01,
+                       3.38465787e-01,  -4.70160885e-01,  -8.67330331e-01,
+                      -2.59831604e-01],
+                    [  2.59435014e-01,  -5.79651980e-01,   5.05511107e-01,
+                      -8.66927037e-01,  -4.79369803e-01,   6.09509127e-01,
+                      -6.13131435e-01,   2.78921762e-01,   4.93406182e-02,
+                       8.49615941e-01],
+                    [ -4.73406459e-01,  -8.68077819e-01,   4.70131927e-01,
+                       5.44356059e-01,   8.15631705e-01,   8.63944138e-01,
+                      -9.72096854e-01,  -5.31275828e-01,   2.33556714e-01,
+                       8.98032641e-01],
+                    [  9.00352238e-01,   1.13306376e-01,   8.31212700e-01,
+                       2.83132418e-01,  -2.19984572e-01,  -2.80186658e-02,
+                       2.08620966e-01,   9.90958430e-02,   8.52362853e-01,
+                       8.37466871e-01],
+                    [ -1.62004605e-01,   9.41898143e-01,  -7.28644703e-01,
+                      -9.38746043e-01,  -6.97940041e-01,  -1.77783637e-02,
+                      -9.12514137e-01,   8.69190598e-01,   5.51750427e-01,
+                      -8.12792816e-01],
+                    [ -6.47607489e-01,  -3.35872851e-01,  -7.38006310e-01,
+                       6.18981384e-01,  -3.10526695e-01,   8.80214965e-01,
+                       1.64028360e-01,   7.57663969e-01,   6.89468891e-01,
+                       8.10784637e-01],
+                    [ -8.02394684e-02,   9.26936320e-02,   5.97207182e-01,
+                      -4.28562297e-01,  -1.94929548e-02,   1.98220615e-01,
+                      -9.68933449e-01,   1.86962816e-01,  -1.32647302e-01,
+                       6.14721058e-01],
+                    [ -9.38734094e-01,   6.67832523e-01,   9.38683788e-01,
+                       2.87573557e-01,   3.73811452e-01,   5.20106141e-01,
+                      -1.25277951e+00,   1.92745923e-01,   1.09186285e+00,
+                      -8.13815289e-05],
+                    [ -1.83323272e+00,   2.41383782e+00,  -3.80277512e+00,
+                      -2.71960838e+00,  -3.20747536e+00,  -2.84747334e+00,
+                      -3.41591894e+00,  -3.26263824e+00,  -3.99832358e+00,
+                      -3.89157337e-01],
+                    [  4.50835553e+00,   2.46631329e+00,  -5.49066137e+00,
+                      -5.60875714e+00,  -5.27385840e+00,  -6.37312364e+00,
+                      -4.94076987e+00,  -6.10619499e+00,  -6.22817188e+00,
+                      -1.25982019e+00],
+                    [  3.13172029e+00,   1.46244207e+00,  -2.09863292e-01,
+                      -6.82171609e-01,   1.09894236e+00,   5.64784464e-02,
+                      -1.66129977e-03,  -5.40446458e-01,  -9.47766646e-01,
+                       5.54683448e-01],
+                    [ -1.13516551e+00,  -3.06374388e-01,  -3.01883925e+00,
+                      -3.83337265e+00,  -3.80377580e+00,  -2.60062738e+00,
+                      -3.26723470e+00,  -2.70229800e+00,  -3.18195752e+00,
+                       5.82020904e-01],
+                    [ -2.45464433e-01,  -4.37728086e-01,   2.71935439e+00,
+                       2.50151995e+00,   2.26894286e+00,   1.66506010e+00,
+                       2.46225402e+00,   1.70713893e+00,   3.61894986e+00,
+                       1.39563564e+00],
+                    [ -3.07637760e+00,  -7.83635664e-02,   6.26806039e+00,
+                       6.43217500e+00,   4.35486442e+00,   5.47958005e+00,
+                       4.66409357e+00,   4.99050180e+00,   6.01022370e+00,
+                       2.36430582e-01]])
 
+   
+
+        self.weights2= np.matrix(\
+           [[ 0.33614915],
+            [ 1.18593395],
+            [-1.10468482],
+            [-2.52514263],
+            [ 1.90644283],
+            [-0.52167766],
+            [ 2.27232407],
+            [ 0.29849388],
+            [-0.06612088],
+            [ 1.51622961]])
 
         
 
@@ -148,44 +196,49 @@ class AIPlayer(Player):
     #Return: The coordinates of where the construction is to be placed
     ##
     def getPlacement(self, currentState):
-        numToPlace = 0
-        #implemented by students to return their next move
-        if currentState.phase == SETUP_PHASE_1:    #stuff on my side
-            numToPlace = 11
-            moves = []
-            for i in range(0, numToPlace):
-                move = None
-                while move == None:
-                    #Choose any x location
-                    x = random.randint(0, 9)
-                    #Choose any y location on your side of the board
-                    y = random.randint(0, 3)
-                    #Set the move if this space is empty
-                    if currentState.board[x][y].constr == None and (x, y) not in moves:
-                        move = (x, y)
-                        #Just need to make the space non-empty. So I threw whatever I felt like in there.
-                        currentState.board[x][y].constr == True
-                moves.append(move)
-            return moves
-        elif currentState.phase == SETUP_PHASE_2:   #stuff on foe's side
+         #keep track of these
+        self.myFood = None
+        self.myFood1 = None
+        self.myFood2 = None
+        self.myTunnel = None
+        self.enemyAnthill = None
+        self.enemyTunnel = None
+        self.constrCoords = None
+
+        if (currentState.whoseTurn == PLAYER_TWO):
+            #we are player 1
+            enemy = 1
+        else:
+            enemy = 0
+
+        if currentState.phase == SETUP_PHASE_1:
+            return [(2,1), (7, 2),
+                    (6,3), (5,3), (0,3), (1,3), \
+                    (2,3), (3,3), (4,3), \
+                    (5,0), (9,0) ];
+
+        #set the enemy food to the least optimal places
+        elif currentState.phase == SETUP_PHASE_2:
+            self.enemyAnthill = getConstrList(currentState, enemy, (ANTHILL,))[0]
+            self.enemyTunnel = getConstrList(currentState, enemy, (TUNNEL,))[0]
             numToPlace = 2
             moves = []
             for i in range(0, numToPlace):
-                move = None
-                while move == None:
-                    #Choose any x location
-                    x = random.randint(0, 9)
-                    #Choose any y location on enemy side of the board
-                    y = random.randint(6, 9)
-                    #Set the move if this space is empty
-                    if currentState.board[x][y].constr == None and (x, y) not in moves:
-                        move = (x, y)
-                        #Just need to make the space non-empty. So I threw whatever I felt like in there.
-                        currentState.board[x][y].constr == True
-                moves.append(move)
+                for j in range(0,9):
+                    for k in range (6,9):
+                        move = None
+                        #Find the farthest open space
+                        if(((stepsToReach(currentState, (j,k), self.enemyTunnel.coords))\
+                            + (stepsToReach(currentState, (j,k), self.enemyAnthill.coords)))
+                            > ((stepsToReach(currentState, moves, self.enemyTunnel.coords))\
+                            + (stepsToReach(currentState, moves, self.enemyAnthill.coords)))):
+                            #Set the move if this space is empty
+                            if currentState.board[j][k].constr == None and (j, k) not in moves:
+                                move = (j, k)
+                                #Just need to make the space non-empty. So I threw whatever I felt like in there.
+                                currentState.board[j][k].constr == True
+                                moves.append(move)
             return moves
-        else:
-            return [(0, 0)]
     
     ##
     #getMove
@@ -200,6 +253,7 @@ class AIPlayer(Player):
         move = self.recurseEval(currentState, 0, 0, 1)
         if move is None:
             return Move(END, None, None)
+        print "MAKIN MOVES"
         return move        
            
     
@@ -212,9 +266,11 @@ class AIPlayer(Player):
     #   attackingAnt - The ant currently making the attack (Ant)
     #   enemyLocation - The Locations of the Enemies that can be attacked (Location[])
     ##
+    
     def getAttack(self, currentState, attackingAnt, enemyLocations):
-        #Attack a random enemy.
-        return enemyLocations[random.randint(0, len(enemyLocations) - 1)]
+    #     #Attack a random enemy.
+            return enemyLocations[0]  #don't care
+    #     return enemyLocations[np.random.randint(0, len(enemyLocations) - 1)]
 
     ##
     # recurseEval
@@ -331,7 +387,7 @@ class AIPlayer(Player):
     #           Returns the score of the state, a double between 0-1
 
     def getScore(self, state, depth):
-    
+        #Heuristic evaluation commented out
         ids = [(self.playerId + 1) % 2, self.playerId] # opponent = 0, player = 1, return i
         
         scores = [100, 100]
@@ -354,11 +410,12 @@ class AIPlayer(Player):
         scores[0] += fudge
         scores[1] += fudge
         compositeScore = scores[1]/float(sum(scores))
+        #compositeScore = 0
 
         #convert currentState to input array
         inputArray = self.makeInputLayerArray(state)
-        #Eval with NN and pass in compScore
-        self.neuralEval(inputArray, compositeScore)
+        #Eval with NN and return that score instead
+        neuralScore = self.neuralEval(inputArray, compositeScore)
         return compositeScore
 
                         
@@ -381,14 +438,14 @@ class AIPlayer(Player):
 
 
  
-    # Initialize a network
-    def initNetwork(numInputs, numLayers, numOutput):
-        network = list()
-        hidden_layer = [{'weights':[random() for i in range(numInputs + 1)]} for i in range(numLayers)]
-        network.append(hidden_layer)
-        output_layer = [{'weights':[random() for i in range(numLayers + 1)]} for i in range(numOutput)]
-        network.append(output_layer)
-        return network
+    # # Initialize a network
+    # def initNetwork(numInputs, numLayers, numOutput):
+    #     network = list()
+    #     hidden_layer = [{'weights':[random() for i in range(numInputs + 1)]} for i in range(numLayers)]
+    #     network.append(hidden_layer)
+    #     output_layer = [{'weights':[random() for i in range(numLayers + 1)]} for i in range(numOutput)]
+    #     network.append(output_layer)
+    #     return network
 
     
 
@@ -404,14 +461,14 @@ class AIPlayer(Player):
         inputArray.append(1)
 
         #Sets the first 11 array values according to the amount of food player has
-        for i in range(0, 11):
+        for i in range(0, 12):
             if playerFoodAmt == i:
                 inputArray.append(1)
             else:
                 inputArray.append(0)
 
-        for n in range(12, 23):
-            if oppFoodAmt == (n-12):
+        for n in range(0, 12):
+            if oppFoodAmt == (n):
                 inputArray.append(1)
             else:
                 inputArray.append(0)
@@ -458,49 +515,41 @@ class AIPlayer(Player):
                     inputArray.append(0)
                     inputArray.append(0)
 
-
+        if len(inputArray) != 31:
+            print len(inputArray)
+        while (len(inputArray) != 31):
+            inputArray.append(0)
         return inputArray
 
 
     # sigmoid function
-
-    def nonlin(x,deriv=False):
+    def nonlin(self,x,deriv=False):
         if(deriv==True):
-            return x*(1-x)
+            return (x*(1-x))
         return 1/(1+np.exp(-x))
 
     #Make this into the function that takes the network and foreward propagates it
     #returning the eval score
     def neuralEval(self, inputArray, targetScore):
-        
-        # input dataset
-        #result from State -> Array/List Function
-        X = inputArray
- 
-        # seed random numbers to make calculation
-        # deterministic (just a good practice)
-        np.random.seed(1)
-        seed(1)
-        self.network = initNetwork(27, 10, 1)
-        for layer in network:
-            print(layer)
-        # change to use currently defined weights
-        # initialize weights randomly with mean 0
-        weights1 = self.network.weights1
-        weights2 = self.network.weights2
-        print "WEIGHTS BEFORE"
-        print weights1
-        print weights2
-        #weights1 = 2*np.random.random((31,10)) - 1
-        #weights2 = 2*np.random.random((10,1)) - 1
+        #print weights1
+        #print weights2
+        #self.weights1 = 2*np.random.random((31,10)) - 1
+        #self.weights2 = 2*np.random.random((10,1)) - 1
 
+        #print len(inputArray)
+        #print self.weights1.shape
+        #print self.weights2.shape
         for j in xrange(1):
             # forward propagation
-            l0 = X
-            l1 = nonlin(np.dot(l0,weights1))
-            l2 = nonlin(np.dot(l1,weights2))
-
-            # how much did we miss? 
+            l0 = np.matrix(inputArray)
+            if self.layer1 == None:
+                l1 = self.nonlin(np.dot(l0,self.weights1))
+                l2 = self.nonlin(np.dot(l1,self.weights2))
+            else:
+                print "NEWGAME"
+                l1 = self.nonlin(np.dot(l0,self.layer1))
+                l2 = self.nonlin(np.dot(l1,self.layer2))
+            # Error, removed without heuristic
             l2_error = targetScore - l2
             if (j% 10000) == 0:
                 print "Error:" + str(np.mean(np.abs(l2_error)))
@@ -508,87 +557,99 @@ class AIPlayer(Player):
 
             # in what direction is the target value?
             # were we really sure? if so, don't change too much.
-            l2_delta = l2_error*nonlin(l2,deriv=True)
-
+            l2_delta = l2_error*(self.nonlin(l2,deriv=True))
+            #print l2.shape
             # how much did each l1 value contribute to the l2 error (according to the weights)?
-
-            l1_error = l2_delta.dot(weights2.T)
+            l1_error = l2_delta.dot(self.weights2.T)
             # multiply how much we missed by the
             # slope of the sigmoid at the values in l1
-            l1_delta = l1_error * nonlin(l1,True)
+            #temp = (self.nonlin(l1,deriv=True))
+            #print l1.shape
+            temp = (l1.T*(1-l1))
+            l1_delta = l1_error*temp
+
             # update weights    
-            self.network.weights2 += l1.T.dot(l2_delta)
-            self.network.weights1 += l0.T.dot(l1_delta)
+            self.weights2 += l1.getT().dot(l2_delta)
+            self.weights1 += l0.getT().dot(l1_delta)
+        #print l2[0,0]
+        return l2[0,0]
+        #print "Output After Training:"
+        #print l2
 
-        print "Output After Training:"
-        print l2
-
-        #REGISTER WIN
+    #REGISTER WIN
+    def registerWin(self, hasWon):
         #pass the adjusted weights from this game to the next
-
+        self.layer1 = self.weights1
+        self.layer2 = self.weights2
+        self.currGame += 1
         #print out weights when we are done with games
-
+       
+        print repr(self.layer1)
+        print repr(self.layer2)
         #Aim for error within 0.03 
+ 
+        pass
 
 
+    # #Unit test/training
+    # Basis for neuralEval function 
+    # Algorithm form:
+    # http://iamtrask.github.io/2015/07/12/basic-python-network/
+    # #best and worst case and a couple middle cases
+    # X = np.array([[1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+    #             [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+    #             [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+    #             [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1]])
+    # #change to target score from Heuristic eval
+    # # output dataset           
+    # y = np.array([[1,.5,.5,0]]).T
+
+    # # seed random numbers to make calculation
+    # # deterministic (just a good practice)
+    # np.random.seed(1)
+
+    # # initialize weights randomly with mean 0
+    # weights1 = 2*np.random.random((31,10)) - 1
+    # weights2 = 2*np.random.random((10,1)) - 1
+    # seed(1)
+    # network = initNetwork(27, 10, 1)
+    # for layer in network:
+    #     print(layer)
+    # #weights1 = network.weights1
+    # #weights2 = network.weights2
+    # print "WEIGHTS BEFORE"
+    # print weights1
+    # print weights2
+    # for j in xrange(60000):
+    #     # forward propagation
+    #     l0 = X
+    #     l1 = nonlin(np.dot(l0,weights1))
+    #     l2 = nonlin(np.dot(l1,weights2))
+
+    #     # how much did we miss? 
+    #     l2_error = y - l2
+    #     if (j% 10000) == 0:
+    #         print "Error:" + str(np.mean(np.abs(l2_error)))
 
 
-    #Unit test/training
-    #best and worst case
-    X = np.array([[1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
-                [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
-                [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
-                [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1]])
-    #change to target score from Heuristic eval
-    # output dataset           
-    y = np.array([[1,.5,.5,0]]).T
+    #     # in what direction is the target value?
+    #     # were we really sure? if so, don't change too much.
+    #     l2_delta = l2_error*nonlin(l2,deriv=True)
 
-    # seed random numbers to make calculation
-    # deterministic (just a good practice)
-    np.random.seed(1)
+    #     # how much did each l1 value contribute to the l2 error (according to the weights)?
 
-    # initialize weights randomly with mean 0
-    #weights1 = 2*np.random.random((31,10)) - 1
-    #weights2 = 2*np.random.random((10,1)) - 1
-    seed(1)
-    network = initNetwork(27, 10, 1)
-    for layer in network:
-        print(layer)
-    weights1 = network.hidden_layer[0]
-    weights2 = network.hidden_layer[1]
-    print "WEIGHTS BEFORE"
-    print weights1
-    print weights2
-    for j in xrange(60000):
-        # forward propagation
-        l0 = X
-        l1 = nonlin(np.dot(l0,weights1))
-        l2 = nonlin(np.dot(l1,weights2))
+    #     l1_error = l2_delta.dot(weights2.T)
+    #     # multiply how much we missed by the
+    #     # slope of the sigmoid at the values in l1
+    #     l1_delta = l1_error * nonlin(l1,True)
+    #     # update weights    
+    #     weights2 += l1.T.dot(l2_delta)
+    #     weights1 += l0.T.dot(l1_delta)
 
-        # how much did we miss? 
-        l2_error = y - l2
-        if (j% 10000) == 0:
-            print "Error:" + str(np.mean(np.abs(l2_error)))
-
-
-        # in what direction is the target value?
-        # were we really sure? if so, don't change too much.
-        l2_delta = l2_error*nonlin(l2,deriv=True)
-
-        # how much did each l1 value contribute to the l2 error (according to the weights)?
-
-        l1_error = l2_delta.dot(weights2.T)
-        # multiply how much we missed by the
-        # slope of the sigmoid at the values in l1
-        l1_delta = l1_error * nonlin(l1,True)
-        # update weights    
-        weights2 += l1.T.dot(l2_delta)
-        weights1 += l0.T.dot(l1_delta)
-
-    print "Output After Training:"
-    # print l0
-    # print l1
-    # print l2
-    print weights1
-    print "*****************************************************"
-    print weights2
+    # print "Output After Training:"
+    # # print l0
+    # # print l1
+    # # print l2
+    # print weights1
+    # print "*****************************************************"
+    # print weights2

@@ -253,7 +253,6 @@ class AIPlayer(Player):
         move = self.recurseEval(currentState, 0, 0, 1)
         if move is None:
             return Move(END, None, None)
-        print "MAKIN MOVES"
         return move        
            
     
@@ -269,7 +268,7 @@ class AIPlayer(Player):
     
     def getAttack(self, currentState, attackingAnt, enemyLocations):
     #     #Attack a random enemy.
-            return enemyLocations[0]  #don't care
+        return enemyLocations[0]  #don't care
     #     return enemyLocations[np.random.randint(0, len(enemyLocations) - 1)]
 
     ##
@@ -298,16 +297,16 @@ class AIPlayer(Player):
         if currentDepth == self.depthLimit:
             return self.getScore(currentState, currentDepth)
  
-# get all valid moves
+        # get all valid moves
         allMoves = self.listAllRecurseMoves(currentState)
         nextMoves= []
         for i in allMoves:
             if i.moveType == MOVE_ANT:
-# remove moves where queen ends up on her anthill
+        # remove moves where queen ends up on her anthill
                 if i.coordList[0] == currentState.inventories[self.playerId].getQueen().coords:
                     if i.coordList[-1] == currentState.inventories[self.playerId].getAnthill().coords:
                         continue
-# remove moves that go outof the territory
+        # remove moves that go outof the territory
                 if isPathOkForQueen(i.coordList):
                     nextMoves.append(i)
                     
@@ -325,23 +324,23 @@ class AIPlayer(Player):
            
             #MAX
             if currentState.whoseTurn == self.playerId:
-# initial max val is 0
+        # initial max val is 0
                 bestVal = 0.0
                 for node in sortedNodes:
                     newVal =  self.recurseEval(node['state'], (currentDepth + 1), alpha, beta) 
                     
-# if the current score is greater than the best recorded for the state
+                    # if the current score is greater than the best recorded for the state
                     if newVal > bestVal:
-# change the best value from that state
+                    # change the best value from that state
                         bestVal = newVal
-# change the beta value if the new best value is greater than the current one value
+                        # change the beta value if the new best value is greater than the current one value
                         if bestVal > alpha:
                             alpha = bestVal
-# prune if beta is less than or equal to alpha
+                        # prune if beta is less than or equal to alpha
                         if beta <= alpha:
                             #print "PRUNE ?" + "alpha = " + str(alpha) + "\tbeta" + str(beta)
                             break
-# change the best move from that state
+                        # change the best move from that state
                         bestMove = node['latestMove']
                 if currentDepth == 0:
                     #print "RETURN"
@@ -350,24 +349,24 @@ class AIPlayer(Player):
                 return bestVal
             #MIN
             else:
-# reverse the order of the sorted nodes to optimize alpha beta pruning for the min player
+                # reverse the order of the sorted nodes to optimize alpha beta pruning for the min player
                 sortedNodes.reverse()
-# initial max val is 0
+                # initial max val is 0
                 bestVal = 1.0
                 for node in sortedNodes:
                     newVal =  self.recurseEval(node['state'], (currentDepth + 1), alpha, beta) 
                     
-# if the current score is less than than the best recorded for the state
+                            # if the current score is less than than the best recorded for the state
                     if newVal < bestVal:
                         bestVal = newVal
                         if bestVal < beta:
-# change the beta value if the new best value is less than the current minimum value
+                            #change the beta value if the new best value is less than the current minimum value
                             beta = bestVal
-# prune if beta is less than or equal to alpha
+                        # prune if beta is less than or equal to alpha
                         if beta <= alpha:
                             #print "PRUNE ?" + "alpha = " + str(alpha) + "\tbeta" + str(beta)
                             break
-# change the best move from that state
+                        # change the best move from that state
                         bestMove = node['latestMove']
                 if currentDepth == 0:
                     #print "RETURN"
@@ -387,7 +386,7 @@ class AIPlayer(Player):
     #           Returns the score of the state, a double between 0-1
 
     def getScore(self, state, depth):
-        #Heuristic evaluation commented out
+    #Heuristic evaluation 
         ids = [(self.playerId + 1) % 2, self.playerId] # opponent = 0, player = 1, return i
         
         scores = [100, 100]
@@ -411,12 +410,12 @@ class AIPlayer(Player):
         scores[1] += fudge
         compositeScore = scores[1]/float(sum(scores))
         #compositeScore = 0
-
-        #convert currentState to input array
+    #Neural Evaluation
+        #convert currentState to input array for Neural Evaluation
         inputArray = self.makeInputLayerArray(state)
         #Eval with NN and return that score instead
         neuralScore = self.neuralEval(inputArray, compositeScore)
-        #return compositeScore
+        #return the evaluated score from the network
         return neuralScore
                         
     ##
@@ -435,22 +434,7 @@ class AIPlayer(Player):
         return result
 
 
-
-
- 
-    # # Initialize a network
-    # def initNetwork(numInputs, numLayers, numOutput):
-    #     network = list()
-    #     hidden_layer = [{'weights':[random() for i in range(numInputs + 1)]} for i in range(numLayers)]
-    #     network.append(hidden_layer)
-    #     output_layer = [{'weights':[random() for i in range(numLayers + 1)]} for i in range(numOutput)]
-    #     network.append(output_layer)
-    #     return network
-
-    
-
-
-
+    #funciton that takes a gamestate and returns our array representation of that state
     def makeInputLayerArray(self, currentState):
 
         inputArray = []
@@ -531,14 +515,6 @@ class AIPlayer(Player):
     #Make this into the function that takes the network and foreward propagates it
     #returning the eval score
     def neuralEval(self, inputArray, targetScore):
-        #print weights1
-        #print weights2
-        #self.weights1 = 2*np.random.random((31,10)) - 1
-        #self.weights2 = 2*np.random.random((10,1)) - 1
-
-        #print len(inputArray)
-        #print self.weights1.shape
-        #print self.weights2.shape
         for j in xrange(1):
             # forward propagation
             l0 = np.matrix(inputArray)
@@ -546,37 +522,29 @@ class AIPlayer(Player):
                 l1 = self.nonlin(np.dot(l0,self.weights1))
                 l2 = self.nonlin(np.dot(l1,self.weights2))
             else:
+                #use updated weights for next game
                 print "NEWGAME"
                 l1 = self.nonlin(np.dot(l0,self.layer1))
                 l2 = self.nonlin(np.dot(l1,self.layer2))
-            # Error, removed without heuristic
+
+            # Calculate output error
             l2_error = targetScore - l2
             if (j% 10000) == 0:
                 print "Error:" + str(np.mean(np.abs(l2_error)))
                 print repr(l2)
 
-            # in what direction is the target value?
-            # were we really sure? if so, don't change too much.
+            #calculate error and delta values for back propagation
             l2_delta = l2_error*(self.nonlin(l2,deriv=True))
-            #print l2.shape
-            # how much did each l1 value contribute to the l2 error (according to the weights)?
             l1_error = l2_delta.dot(self.weights2.T)
-            # multiply how much we missed by the
-            # slope of the sigmoid at the values in l1
-            #temp = (self.nonlin(l1,deriv=True))
-            #print l1.shape
-            temp = (l1.T*(1-l1))
-            l1_delta = l1_error*temp
+            l1_delta = l1_error*(l1.T*(1-l1))
 
-            # update weights    
+            # update weights for training 
             #self.weights2 += l1.getT().dot(l2_delta)
             #self.weights1 += l0.getT().dot(l1_delta)
-        #print l2[0,0]
         return l2[0,0]
-        #print "Output After Training:"
-        #print l2
 
-    #REGISTER WIN
+
+    #REGISTER WIN called when  game is over
     def registerWin(self, hasWon):
         #pass the adjusted weights from this game to the next
         self.layer1 = self.weights1
@@ -587,7 +555,6 @@ class AIPlayer(Player):
         print repr(self.layer1)
         print repr(self.layer2)
         #Aim for error within 0.03 
- 
         pass
 
 
